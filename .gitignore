@@ -12,3 +12,6 @@ build/
 .venv/
 uv.lock
 .python-version
+
+# CLI wrapper generated markdown files
+output/
