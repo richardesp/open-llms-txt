@@ -4,4 +4,11 @@ version = "0.1.0"
 description = "CLI tool to auto-generate llms.txt and .html.md files for making your website LLM-ready. Helps AI agents access your content cleanly, without scraping or CAPTCHA headaches."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "beautifulsoup4>=4.13.4",
+    "httpx>=0.28.1",
+    "markdownify>=1.2.0",
+]
+
+[project.scripts]
+open-llms-txt = "open_llms_txt.main:cli"
