@@ -11,13 +11,14 @@ from .base_scraper import BaseScraper
 
 logger = logging.getLogger(__name__)
 
+
 class WebScraper(BaseScraper):
     def __init__(self, root: str):
         super().__init__(root)
-        self.domain = urlparse(self.root).netloc
+        self.domain = urlparse(self.root_page).netloc
         self.client = httpx.AsyncClient(follow_redirects=True)
 
-    async def _fetch(self, url: str) -> str:
+    async def fetch_content(self, url: str) -> str:
         try:
             response = await self.client.get(url)
             response.raise_for_status()
@@ -26,8 +27,8 @@ class WebScraper(BaseScraper):
             logger.warning(f"⚠️ Could not fetch {url}: {e}")
             return ""
 
-    async def collect_views(self) -> Dict[str, str]:
-        html = await self._fetch(self.root)
+    async def collect_root_subpages(self) -> Dict[str, str]:
+        html = await self.fetch_content(self.root_page)
         if not html:
             return {}
 
@@ -41,16 +42,24 @@ class WebScraper(BaseScraper):
             parsed_href = urlparse(href)
 
             if parsed_href.netloc == "" or parsed_href.netloc == self.domain:
-                full_url = urljoin(self.root, href)
+                full_url = urljoin(self.root_page, href)
                 logger.debug(f"Current subview detected: {full_url}")
-                self.subpages.add(full_url)
+                self.root_subpages.add(full_url)
 
-        for url in self.subpages:
-            content = await self._fetch(url)
+        for url in self.root_subpages:
+            content = await self.fetch_content(url)
             if content:
-                content_map[url] = content
+                soup = BeautifulSoup(content, "html.parser")
+                main_heading = soup.find("h1")
+                header_text = (
+                    main_heading.get_text(strip=True) if main_heading else "Untitled"
+                )
+
+                content_map[url] = header_text
 
         return content_map
 
-    async def close(self):
+    async def close(
+        self,
+    ):  # TODO: remove close to embebd it directly into def __del__ as an abstract method
         await self.client.aclose()
