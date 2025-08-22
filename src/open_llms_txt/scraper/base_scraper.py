@@ -30,3 +30,7 @@ class BaseScraper(ABC):
     async def fetch_content(self, path: str) -> str:
         """Returns the HTML content from the path"""
         pass
+    
+    async def close(self) -> None:
+        """Optional async cleanup. Default: no-op"""
+        return

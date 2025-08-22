@@ -59,7 +59,6 @@ class WebScraper(BaseScraper):
 
         return content_map
 
-    async def close(
-        self,
-    ):  # TODO: remove close to embebd it directly into def __del__ as an abstract method
+    async def close(self) -> None:
         await self.client.aclose()
+        await super().close()
