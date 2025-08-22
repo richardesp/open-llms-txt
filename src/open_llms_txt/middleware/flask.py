@@ -1,12 +1,14 @@
 from __future__ import annotations
 from functools import wraps
-from typing import Callable, Optional, Set
+from typing import Callable, Set, Dict
 from flask import Blueprint, current_app, request, Response
 from urllib.parse import urljoin
 from open_llms_txt.generator.html_to_md import HtmlToMdGenerator
 
 # Only routes explicitly decorated can be mirrored
 _ALLOWED_PATHS: Set[str] = set()
+_DECORATED_ENDPOINTS: Set[str] = set()   
+_ENDPOINT_POLICY: Dict[str, bool] = {}  
 _BLUEPRINT_MOUNTED = False
 
 
@@ -17,11 +19,6 @@ def _ensure_blueprint(
     template_name: str,
     url_prefix: str = "",
 ) -> None:
-    """
-    Mount a catch‑all route: '<prefix>/<path:raw>.html.md'
-    Proxies to '/{raw}', renders HTML via Flask's test client,
-    then converts to Markdown using HtmlToMdGenerator(template_dir, template_name).
-    """
     if not template_name:
         raise ValueError("template_name is required")
 
@@ -35,7 +32,19 @@ def _ensure_blueprint(
     def _md_mirror(raw: str):
         target_path = f"/{raw}"
 
-        if _ALLOWED_PATHS and target_path not in _ALLOWED_PATHS:
+        # Checking allowed paths
+        try:
+            rules = list(current_app.url_map.iter_rules())
+            _ALLOWED_PATHS.clear()
+            for rule in rules:
+                if rule.endpoint in _DECORATED_ENDPOINTS:
+                    if not _ENDPOINT_POLICY.get(rule.endpoint, False) and "<" in rule.rule:
+                        continue
+                    _ALLOWED_PATHS.add(rule.rule)
+        except Exception:
+            pass
+
+        if target_path not in _ALLOWED_PATHS:
             return Response(
                 "# 404\nMarkdown mirror not enabled for this path.\n",
                 status=404,
@@ -95,21 +104,13 @@ def html2md(
     )
 
     def decorator(view_func: Callable) -> Callable:
-        # Allow first time access to a view
-        try:
-            endpoint = view_func.__name__
-            for rule in app.url_map.iter_rules():
-                if rule.endpoint != endpoint:
-                    continue
-                if not allow_param_routes and "<" in rule.rule:
-                    continue
-                _ALLOWED_PATHS.add(rule.rule)
-        except Exception:
-            pass
+        # Record that this endpoint has opted in (route may not be registered yet)
+        endpoint = view_func.__name__
+        _DECORATED_ENDPOINTS.add(endpoint)
+        _ENDPOINT_POLICY[endpoint] = allow_param_routes
 
         @wraps(view_func)
         def wrapper(*args, **kwargs):
-            # No-op wrapper; original behavior unchanged
             return view_func(*args, **kwargs)
 
         return wrapper
