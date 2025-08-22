@@ -13,10 +13,12 @@ class HtmlToMdGenerator:
 
         self.env = Environment(
             loader=FileSystemLoader(template_dir),
-            autoescape=select_autoescape([])
+            autoescape=False,
+            trim_blocks=True,
+            lstrip_blocks=True
         )
         self.template = self.env.get_template(template_name)
 
     def render(self, html: str, root_url: str = None, source_url: str = None) -> str:
         context = parse_html_to_json(html, root_url=root_url, source_url=source_url)
-        return self.template.render(**context)
+        return self.template.render(engine="jinja2", **context)
