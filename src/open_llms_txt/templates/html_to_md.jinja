@@ -1,0 +1,20 @@
+# {{ h1 or title }}
+
+{% for paragraph in paragraphs %}
+{{ paragraph }}
+
+{% endfor %}
+
+{% if headings %}
+## Sections
+{% for heading in headings %}
+- {{ heading }}
+{% endfor %}
+{% endif %}
+
+{% if links %}
+## Links
+{% for link in links %}
+- [{{ link.text }}]({{ link.href }})
+{% endfor %}
+{% endif %}
