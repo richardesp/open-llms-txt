@@ -1,0 +1,27 @@
+## Metadata
+- Root: {{ metadata.root_url }}
+- Source: {{ metadata.source_url }}
+- License: CC-BY-4.0
+- Crawl Policy: allow
+
+---
+
+# {{ h1 or title }}
+
+{% if paragraphs and paragraphs|length > 0 %}
+> {{ paragraphs[0] }}
+{% endif %}
+
+{% if paragraphs and paragraphs|length > 1 %}
+{% for p in paragraphs[1:] %}
+{{ p }}
+
+{% endfor %}
+{% endif %}
+
+{% if links and links|length > 0 %}
+## Docs
+{% for link in links %}
+- [{{ link.text }}]({{ link.href }})
+{% endfor %}
+{% endif %}
