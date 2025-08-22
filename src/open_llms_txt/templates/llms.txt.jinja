@@ -6,13 +6,13 @@
 
 ---
 
-# {{ h1 or title }}
+# {{ h1 | default(title, true) }}
 
-{% if paragraphs and paragraphs|length > 0 %}
+{% if paragraphs and (paragraphs | length) > 0 %}
 > {{ paragraphs[0] }}
 {% endif %}
 
-{% if paragraphs and paragraphs|length > 1 %}
+{% if paragraphs and (paragraphs | length) > 1 %}
 {% for p in paragraphs[1:] %}
 {{ p }}
 
@@ -20,10 +20,10 @@
 {% endif %}
 
 ## Docs
-{% if links and links|length > 0 %}
+{% if links %}
   {% if engine == "jinja2" %}
     {% include "partials/links.jinja" %}
-  {% else %}
+  {% elif engine == "nunjucks" %}
     {% include "partials/links.njk" %}
   {% endif %}
 {% endif %}

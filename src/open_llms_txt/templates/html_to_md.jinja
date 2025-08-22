@@ -6,11 +6,10 @@
 
 ---
 
-# {{ h1 or title }}
+# {{ h1 | default(title, true) }}
 
 {% for paragraph in paragraphs %}
 {{ paragraph }}
-
 {% endfor %}
 
 {% if headings %}
@@ -24,7 +23,7 @@
 {% if links %}
   {% if engine == "jinja2" %}
     {% include "partials/links.jinja" %}
-  {% else %}
+  {% elif engine == "nunjucks" %}
     {% include "partials/links.njk" %}
   {% endif %}
 {% endif %}

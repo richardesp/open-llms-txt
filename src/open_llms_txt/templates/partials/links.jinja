@@ -1,6 +1,6 @@
 {% for link in links %}
 - [{{ link.text }}](
-  {%- if link.href.startswith("http") -%}
+  {%- if link.href.startswith("http") -%} 
     {{ link.href }}
   {%- else -%}
     {{ metadata.root_url.rstrip('/') }}/
