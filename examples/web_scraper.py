@@ -2,17 +2,28 @@ import asyncio
 import logging
 
 from open_llms_txt.scraper.web_scraper import WebScraper
+from open_llms_txt.generator.html_to_md import HtmlToMdGenerator
 
 logging.basicConfig()
 logging.getLogger("open_llms_txt").setLevel(logging.DEBUG)
 
 
 async def main():
-    scraper = WebScraper("https://research.ibm.com/")
-    pages = await scraper.collect_root_subpages()
-    print("📄 Discovered .html.md pages from root:")
-    for p in pages:
-        print(f"{p} -> {pages[p]}...\n")
+    # scraper = WebScraper("https://research.ibm.com/")
+    # pages = await scraper.collect_root_subpages()
+    # generator = HtmlToMdGenerator()
+    
+    # for p in pages:
+    #    print(f"{p}:\n{generator.render(await scraper.fetch_content(p), 
+    #          root_url=scraper.root_page, source_url=p)}")
+    #    break    
+    url = "https://llmstxt.org/"
+    scraper = WebScraper("https://llmstxt.org/")
+    generator = HtmlToMdGenerator()
+    print(generator.render(await scraper.fetch_content("https://llmstxt.org/"),
+                           root_url=url,
+                           source_url=url))
+    
     await scraper.close()
 
 
