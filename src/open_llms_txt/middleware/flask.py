@@ -95,19 +95,21 @@ def html2md(
     )
 
     def decorator(view_func: Callable) -> Callable:
+        # Allow first time access to a view
+        try:
+            endpoint = view_func.__name__
+            for rule in app.url_map.iter_rules():
+                if rule.endpoint != endpoint:
+                    continue
+                if not allow_param_routes and "<" in rule.rule:
+                    continue
+                _ALLOWED_PATHS.add(rule.rule)
+        except Exception:
+            pass
+
         @wraps(view_func)
         def wrapper(*args, **kwargs):
-            # Cache route(s) for this endpoint on first call
-            try:
-                endpoint = view_func.__name__
-                for rule in current_app.url_map.iter_rules():
-                    if rule.endpoint != endpoint:
-                        continue
-                    if not allow_param_routes and "<" in rule.rule:
-                        continue
-                    _ALLOWED_PATHS.add(rule.rule)
-            except Exception:
-                pass
+            # No-op wrapper; original behavior unchanged
             return view_func(*args, **kwargs)
 
         return wrapper
