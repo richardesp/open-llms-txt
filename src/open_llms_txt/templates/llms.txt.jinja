@@ -19,9 +19,11 @@
 {% endfor %}
 {% endif %}
 
-{% if links and links|length > 0 %}
 ## Docs
-{% for link in links %}
-- [{{ link.text }}]({{ link.href }})
-{% endfor %}
+{% if links and links|length > 0 %}
+  {% if engine == "jinja2" %}
+    {% include "partials/links.jinja" %}
+  {% else %}
+    {% include "partials/links.njk" %}
+  {% endif %}
 {% endif %}
