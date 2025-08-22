@@ -4,7 +4,7 @@ from typing import Dict, Any
 
 from urllib.parse import urljoin
 
-def simplify_html(html: str, root_url: str = None, source_url: str = None) -> Dict[str, Any]:
+def parse_html_to_json(html: str, root_url: str = None, source_url: str = None) -> Dict[str, Any]:
     soup = BeautifulSoup(html, "html.parser")
 
     def clean(text: str) -> str:

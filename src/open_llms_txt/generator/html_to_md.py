@@ -2,7 +2,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from typing import Optional
 
-from ..html_parser import simplify_html
+from ..parsers.html import parse_html_to_json
 
 
 class HtmlToMdGenerator:
@@ -18,5 +18,5 @@ class HtmlToMdGenerator:
         self.template = self.env.get_template(template_name)
 
     def render(self, html: str, root_url: str = None, source_url: str = None) -> str:
-        context = simplify_html(html, root_url=root_url, source_url=source_url)
+        context = parse_html_to_json(html, root_url=root_url, source_url=source_url)
         return self.template.render(**context)
