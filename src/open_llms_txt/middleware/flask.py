@@ -7,8 +7,8 @@ from open_llms_txt.generator.html_to_md import HtmlToMdGenerator
 
 # Only routes explicitly decorated can be mirrored
 _ALLOWED_PATHS: Set[str] = set()
-_DECORATED_ENDPOINTS: Set[str] = set()   
-_ENDPOINT_POLICY: Dict[str, bool] = {}  
+_DECORATED_ENDPOINTS: Set[str] = set()
+_ENDPOINT_POLICY: Dict[str, bool] = {}
 _BLUEPRINT_MOUNTED = False
 
 
@@ -18,6 +18,7 @@ def _ensure_blueprint(
     template_dir: str | None,
     template_name: str,
     url_prefix: str = "",
+    blueprint_rule: str,
 ) -> None:
     if not template_name:
         raise ValueError("template_name is required")
@@ -28,7 +29,7 @@ def _ensure_blueprint(
 
     bp = Blueprint("llms_md", __name__, url_prefix=url_prefix)
 
-    @bp.get("/<path:raw>.html.md")
+    @bp.get(blueprint_rule)
     def _md_mirror(raw: str):
         target_path = f"/{raw}"
 
@@ -38,7 +39,10 @@ def _ensure_blueprint(
             _ALLOWED_PATHS.clear()
             for rule in rules:
                 if rule.endpoint in _DECORATED_ENDPOINTS:
-                    if not _ENDPOINT_POLICY.get(rule.endpoint, False) and "<" in rule.rule:
+                    if (
+                        not _ENDPOINT_POLICY.get(rule.endpoint, False)
+                        and "<" in rule.rule
+                    ):
                         continue
                     _ALLOWED_PATHS.add(rule.rule)
         except Exception:
@@ -77,9 +81,10 @@ def _ensure_blueprint(
 def html2md(
     app,
     *,
-    template_name: str,
     template_dir: str | None = None,
+    template_name: str,
     mount_prefix: str = "",
+    blueprint_rule: str = "/<path:raw>.html.md",
     allow_param_routes: bool = False,
 ) -> Callable[[Callable], Callable]:
     """
@@ -101,6 +106,7 @@ def html2md(
         template_dir=template_dir,
         template_name=template_name,
         url_prefix=mount_prefix or "",
+        blueprint_rule=blueprint_rule,
     )
 
     def decorator(view_func: Callable) -> Callable:
