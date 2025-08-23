@@ -71,7 +71,13 @@ def _ensure_blueprint(
         generator = HtmlToMdGenerator(
             template_dir=template_dir, template_name=template_name
         )
-        md = generator.render(html, root_url=base, source_url=source_url)
+        md = generator.render(
+            html,
+            root_url=base,
+            source_url=source_url,
+            allowed_paths=sorted(_ALLOWED_PATHS),
+            mount_prefix=url_prefix,
+        )
         return Response(md, mimetype="text/markdown; charset=utf-8")
 
     app.register_blueprint(bp)
