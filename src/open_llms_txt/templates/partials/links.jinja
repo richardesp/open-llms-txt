@@ -1,4 +1,5 @@
 {% for link in links %}
+  {% if link.href in metadata.allowed_paths %}
 - [{{ link.text }}](
   {%- if link.href.startswith("http") -%} 
     {{ link.href }}
@@ -12,4 +13,5 @@
     {%- else -%}.html.md{% endif %}
   {%- endif -%}
 )
+  {% endif %}
 {% endfor %}
