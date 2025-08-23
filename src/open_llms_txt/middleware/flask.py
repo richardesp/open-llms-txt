@@ -10,10 +10,10 @@ _ALLOWED_PATHS: Set[str] = set()
 _DECORATED_ENDPOINTS: Set[str] = set()
 _ENDPOINT_POLICY: Dict[str, bool] = {}
 _BLUEPRINT_MOUNTED = False
-_MANIFEST_BP_MOUNTED = False 
+_MANIFEST_BP_MOUNTED = False
 
 
-def _ensure_blueprint(
+def _ensure_html2md_blueprint(
     app,
     *,
     template_dir: str | None,
@@ -28,10 +28,10 @@ def _ensure_blueprint(
     if _BLUEPRINT_MOUNTED:
         return
 
-    bp = Blueprint("llms_md", __name__, url_prefix=url_prefix)
+    bp = Blueprint("html2md_manifest", __name__, url_prefix=url_prefix)
 
     @bp.get(blueprint_rule)
-    def _md_mirror(raw: str):
+    def _html2md_manifest(raw: str):
         target_path = f"/{raw}"
 
         # Checking allowed paths
@@ -108,7 +108,7 @@ def html2md(
     if not template_name:
         raise ValueError("template_name is required")
 
-    _ensure_blueprint(
+    _ensure_html2md_blueprint(
         app,
         template_dir=template_dir,
         template_name=template_name,
@@ -131,66 +131,7 @@ def html2md(
     return decorator
 
 
-def llmstxt(
-    app,
-    *,
-    template_dir: str | None = None,
-    template_name: str,
-    mount_prefix: str = "",
-) -> Callable[[Callable], Callable]:
-    """
-    Decorator to expose an LLM-friendly manifest (llms.txt-style) on a chosen endpoint.
-    It lists only routes that were explicitly decorated with @html2md, using the same
-    allow-list logic (and honoring allow_param_routes).
-
-    Example:
-        @app.get("/")
-        @llmstxt(app, template_name="llms.txt.jinja")
-        def root_manifest():
-            return ""  # body ignored; template-driven
-    """
-    if not template_name:
-        raise ValueError("template_name is required")
-
-    def decorator(view_func: Callable) -> Callable:
-        @wraps(view_func)
-        def wrapper(*args, **kwargs):
-            # Rebuild concrete allowed paths from decorated endpoints
-            try:
-                rules = list(current_app.url_map.iter_rules())
-                _ALLOWED_PATHS.clear()
-                for rule in rules:
-                    ep = rule.endpoint
-                    if ep in _DECORATED_ENDPOINTS:
-                        if (not _ENDPOINT_POLICY.get(ep, False)) and "<" in rule.rule:
-                            continue
-                        _ALLOWED_PATHS.add(rule.rule)
-            except Exception:
-                # Keep going with whatever is currently in _ALLOWED_PATHS
-                pass
-
-            base = f"{request.scheme}://{request.host}"
-            source_url = urljoin(base, request.path)
-
-            generator = HtmlToMdGenerator(
-                template_dir=template_dir, template_name=template_name
-            )
-           
-            md = generator.render(
-                "",
-                root_url=base,
-                source_url=source_url,
-                allowed_paths=sorted(_ALLOWED_PATHS),
-                mount_prefix=mount_prefix or "",
-            )
-            return Response(md, mimetype="text/markdown; charset=utf-8")
-
-        return wrapper
-
-    return decorator
-
-
-def _ensure_manifest_blueprint(
+def _ensure_llmstxt_blueprint(
     app,
     *,
     template_dir: str | None,
@@ -215,10 +156,10 @@ def _ensure_manifest_blueprint(
     if _MANIFEST_BP_MOUNTED:
         return
 
-    bp = Blueprint("llms_manifest", __name__)
+    bp = Blueprint("llmstxt_manifest", __name__)
 
     @bp.get(manifest_path)
-    def _llms_manifest():
+    def _llmstxt_manifest():
         # 1) Rebuild concrete allowed paths from decorated endpoints
         try:
             rules = list(current_app.url_map.iter_rules())
@@ -266,7 +207,9 @@ def _ensure_manifest_blueprint(
         source_url = urljoin(base, page_path)
 
         # 3) Render your llms.txt template based on that HTML (parser extracts links)
-        generator = HtmlToMdGenerator(template_dir=template_dir, template_name=template_name)
+        generator = HtmlToMdGenerator(
+            template_dir=template_dir, template_name=template_name
+        )
         md = generator.render(
             html,
             root_url=base,
@@ -290,15 +233,16 @@ def llmstxt(
 ) -> Callable[[Callable], Callable]:
     """
     Decorator that keeps the original endpoint as-is (serving HTML),
-    and ALSO registers a separate manifest route (default: '/llms.txt').
-    The manifest is rendered using the *HTML of the decorated endpoint* as input,
+    and also registers a separate manifest route (default: '/llms.txt').
+    The manifest is rendered using the HTML of the decorated endpoint as input,
     so your template can build an index from that page's links.
 
-    Usage:
+    Example:
         @app.get("/")
-        @llmstxt(app, template_name="llms.txt.jinja", manifest_path="/llms.txt", mount_prefix="")
+        @llmstxt(app, template_name="llms.txt.jinja")
         def home():
-            return render_template("home.html")
+             # -> / (HTML)
+            # -> /llms.txt(Markdown)  OR /.llms/llms.txt mount_prefix="/.llms"
     """
     if not template_name:
         raise ValueError("template_name is required")
@@ -315,7 +259,7 @@ def llmstxt(
         except Exception:
             discovered_rule = None
 
-        _ensure_manifest_blueprint(
+        _ensure_llmstxt_blueprint(
             app,
             template_dir=template_dir,
             template_name=template_name,
