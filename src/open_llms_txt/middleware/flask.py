@@ -95,15 +95,84 @@ def html2md(
     allow_param_routes: bool = False,
 ) -> Callable[[Callable], Callable]:
     """
-    Opt-in decorator: after decorating an endpoint, its Markdown mirror
-    is available at '<mount_prefix>/<route>.html.md'.
+    Opt-in decorator that exposes a Markdown "mirror" for a Flask endpoint.
 
-    Example:
+    After decorating an endpoint, a Markdown version of its HTML response becomes
+    available under a parallel route that ends with ``.html.md``. Only endpoints
+    explicitly decorated with ``@html2md`` are eligible to be mirrored.
+
+    The Markdown is generated at request time by:
+      1) Rendering the original HTML via ``app.test_client()``.
+      2) Converting that HTML to Markdown with ``HtmlToMdGenerator(template_name)``.
+      3) Restricting links to the allow-list derived from decorated routes.
+
+    Parameters
+    ----------
+    app : flask.Flask
+        The Flask application instance. A lightweight internal blueprint is
+        mounted once per process to serve the ``.html.md`` routes.
+    template_dir : str | None, optional
+        Filesystem directory to search for the Jinja template used by
+        ``HtmlToMdGenerator``. If ``None``, the generator's default loader is used.
+    template_name : str
+        Jinja template filename used to render the Markdown output. **Required.**
+    mount_prefix : str, optional
+        URL prefix under which the Markdown mirror is exposed. This becomes the
+        blueprint's ``url_prefix`` and is also passed to the generator as
+        ``mount_prefix`` for constructing internal links. Defaults to ``""`` (no prefix).
+        Example: ``"/.llms"`` will serve mirrors at ``/.llms/<route>.html.md``.
+    blueprint_rule : str, optional
+        The blueprint rule that handles Markdown requests. It **must** contain the
+        ``<path:raw>`` converter so the target HTML path can be mirrored.
+        Defaults to ``"/<path:raw>.html.md"``.
+    allow_param_routes : bool, optional
+        If ``False`` (default), parameterized routes (containing ``<...>``) are
+        **excluded** from the allow-list for safety and predictability. Set to
+        ``True`` to mirror concrete requests to dynamic routes you trust.
+
+    Returns
+    -------
+    Callable[[Callable], Callable]
+        A decorator that returns the original view function unchanged, while
+        registering it as eligible for Markdown mirroring.
+
+    Raises
+    ------
+    ValueError
+        If ``template_name`` is empty.
+
+    Notes
+    -----
+    - **Scope/State:** This middleware uses module-level state
+      (``_DECORATED_ENDPOINTS``, ``_ENDPOINT_POLICY``, ``_ALLOWED_PATHS``) and mounts
+      the internal blueprint once per process. Running multiple Flask apps in the
+      same Python process is not supported without additional isolation.
+    - **Performance:** Each Markdown request issues an internal HTTP request via
+      ``app.test_client()`` to render the original HTML; budget accordingly.
+    - **Security:** Only explicitly decorated endpoints are mirrored. If you
+      enable ``allow_param_routes=True``, ensure your templates and routes handle
+      untrusted parameters safely.
+    - **Content Negotiation:** The mirror is served as
+      ``text/markdown; charset=utf-8`` and returns 4xx/5xx Markdown bodies on error.
+
+    Examples
+    --------
+    Basic usage (no prefix)::
+
         @app.get("/pricing")
         @html2md(app, template_name="html_to_md.jinja")
-        def pricing(): ...
+        def pricing():
+            return render_template("pricing.html")
         # -> /pricing (HTML)
-        # -> /pricing.html.md (Markdown)  OR /.llms/pricing.html.md if mount_prefix="/.llms"
+        # -> /pricing.html.md (Markdown)
+
+    With a mount prefix (recommended for hiding from users)::
+
+        @app.get("/pricing")
+        @html2md(app, template_name="html_to_md.jinja", mount_prefix="/.llms")
+        def pricing():
+            return render_template("pricing.html")
+        # -> /.llms/pricing.html.md (Markdown)
     """
     if not template_name:
         raise ValueError("template_name is required")
@@ -232,17 +301,73 @@ def llmstxt(
     manifest_path: str = "/llms.txt",
 ) -> Callable[[Callable], Callable]:
     """
-    Decorator that keeps the original endpoint as-is (serving HTML),
-    and also registers a separate manifest route (default: '/llms.txt').
-    The manifest is rendered using the HTML of the decorated endpoint as input,
-    so your template can build an index from that page's links.
+    Decorator that keeps the original endpoint as-is (serving HTML) and also
+    registers a site manifest route (``manifest_path``, default ``/llms.txt``)
+    generated from the decorated page's HTML.
 
-    Example:
+    This is useful for exposing an index or sitemap tailored for LLM crawlers.
+    The manifest renderer receives:
+      - The HTML of the decorated endpoint (as ``source_url``).
+      - The allow-list of all routes decorated with ``@html2md``/**and** respecting
+        each endpoint's ``allow_param_routes`` policy.
+      - ``mount_prefix`` so links can target your Markdown mirrors (e.g., ``/.llms``).
+
+    Parameters
+    ----------
+    app : flask.Flask
+        The Flask application instance. A dedicated blueprint is mounted once per
+        process to serve ``manifest_path``.
+    template_dir : str | None, optional
+        Filesystem directory to search for the Jinja template used by
+        ``HtmlToMdGenerator`` for rendering the manifest.
+    template_name : str
+        Jinja template filename used to render the manifest. **Required.**
+    mount_prefix : str, optional
+        A prefix passed to the generator (not the URL of the manifest itself) so
+        your template can build links pointing at the Markdown mirrors, e.g., ``/.llms``.
+        Defaults to ``""``.
+    manifest_path : str, optional
+        Absolute URL rule at which the manifest is exposed. Must start with ``"/"``.
+        Defaults to ``"/llms.txt"``.
+
+    Returns
+    -------
+    Callable[[Callable], Callable]
+        A decorator that returns the original view function unchanged, while
+        ensuring the manifest route is registered once and rendered from that view's HTML.
+
+    Raises
+    ------
+    ValueError
+        If ``template_name`` is empty or ``manifest_path`` does not start with ``"/"``.
+
+    Notes
+    -----
+    - The manifest uses the **decorated endpoint's HTML** as its canonical source,
+      so your Jinja template can discover links (e.g., via parsing) and then
+      cross-reference the allow-list to include only mirrored pages.
+    - The allow-list is rebuilt from the app's URL map on each manifest request,
+      so newly decorated routes appear without restarting.
+    - Module-level state is used to mount the manifest blueprint once per process.
+    - If multiple rules map to the decorated endpoint, a non-parameterized rule
+      is preferred as the canonical ``source_url``.
+
+    Example
+    -------
+    Basic site index for LLMs::
+
         @app.get("/")
-        @llmstxt(app, template_name="llms.txt.jinja")
+        @llmstxt(app, template_name="llms.txt.jinja", mount_prefix="/.llms")
         def home():
-             # -> / (HTML)
-            # -> /llms.txt(Markdown)  OR /.llms/llms.txt mount_prefix="/.llms"
+            return render_template("home.html")
+
+        @app.get("/features")
+        @html2md(app, template_name="html_to_md.jinja")
+        def features():
+            return render_template("features.html")
+
+        # -> / (HTML)
+        # -> /llms.txt (manifest rendered from '/' HTML, linking to /.llms/features.html.md, etc.)
     """
     if not template_name:
         raise ValueError("template_name is required")
