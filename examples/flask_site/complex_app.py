@@ -4,7 +4,7 @@ from datetime import datetime
 import re
 
 # Keep your decorator (uses template_name="html_to_md.jinja" which we inject into the Jinja loader)
-from open_llms_txt.middleware.flask import html2md
+from open_llms_txt.middleware.flask import html2md, llmstxt
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "dev-secret-change-me"
@@ -31,7 +31,7 @@ TEMPLATES = {
       <img class="logo" alt="Acme" src="{{ url_for('logo_svg') }}" width="24" height="24"/> Acme
     </a>
     <div class="nav-links">
-      <a href="{{ url_for('pricing') }}">Pricing (MD)</a>
+      <a href="{{ url_for('pricing') }}">Pricing</a>
       <a href="{{ url_for('features') }}">Features</a>
       <a href="{{ url_for('gallery') }}">Gallery</a>
       <a href="{{ url_for('about') }}">About</a>
@@ -551,6 +551,7 @@ def inject_globals():
     return {"current_year": datetime.utcnow().year}
 
 @app.get("/")
+@llmstxt(app, template_name="llms.txt.jinja")
 def home():
     return render_template("home.html")
 
@@ -578,7 +579,6 @@ def pricing():
 
 # ---- Contact (GET/POST) ----
 @app.get("/contact")
-@html2md(app, template_name="html_to_md.jinja")
 def contact_get():
     return render_template("contact.html")
 
