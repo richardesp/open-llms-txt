@@ -17,10 +17,10 @@ async def main():
     #    print(f"{p}:\n{generator.render(await scraper.fetch_content(p), 
     #          root_url=scraper.root_page, source_url=p)}")
     #    break    
-    url = "https://llmstxt.org/"
-    scraper = WebScraper("https://llmstxt.org/")
-    generator = HtmlToMdGenerator()
-    print(generator.render(await scraper.fetch_content("https://llmstxt.org/"),
+    url = "https://research.ibm.com/"
+    scraper = WebScraper(url)
+    generator = HtmlToMdGenerator(template_name="scraper_template.jinja")
+    print(generator.render(await scraper.fetch_content(url),
                            root_url=url,
                            source_url=url))
     
