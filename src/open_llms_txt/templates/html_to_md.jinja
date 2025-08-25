@@ -1,0 +1,29 @@
+## Metadata
+- Root: {{ metadata.root_url ~ "/llms.txt" }}
+- Source: {{ metadata.source_url ~ ".html.md" }}
+- License: CC-BY-4.0
+- Crawl Policy: allow
+
+---
+
+# {{ h1 | default(title, true) }}
+
+{% for paragraph in paragraphs %}
+{{ paragraph }}
+{% endfor %}
+
+{% if headings %}
+## Sections
+{% for heading in headings %}
+- {{ heading }}
+{% endfor %}
+{% endif %}
+
+## Links
+{% if links %}
+  {% if engine == "jinja2" %}
+    {% include "partials/links.jinja" %}
+  {% elif engine == "nunjucks" %}
+    {% include "partials/links.njk" %}
+  {% endif %}
+{% endif %}

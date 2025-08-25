@@ -4,4 +4,15 @@ version = "0.1.0"
 description = "CLI tool to auto-generate llms.txt and .html.md files for making your website LLM-ready. Helps AI agents access your content cleanly, without scraping or CAPTCHA headaches."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "beautifulsoup4>=4.13.4",
+    "click>=8.2.1",
+    "flask>=3.1.2",
+    "httpx>=0.28.1",
+    "jinja2>=3.1.6",
+    "markdownify>=1.2.0",
+] # TODO: split each dependency based on the middleware or CLI version to use (group 1: flask,
+  # TODO: group 2: fastapi, etc...)
+
+[project.scripts]
+open-llms-txt = "open_llms_txt.main:main"

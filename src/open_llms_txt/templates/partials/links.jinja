@@ -1,0 +1,17 @@
+{% for link in links %}
+  {% if link.href in metadata.allowed_paths %}
+- [{{ link.text }}](
+  {%- if link.href.startswith("http") -%} 
+    {{ link.href }}
+  {%- else -%}
+    {{ metadata.root_url.rstrip('/') }}/
+    {%- if link.href.startswith("./") -%}{{ link.href[2:] }}
+    {%- elif link.href.startswith("/") -%}{{ link.href[1:] }}
+    {%- else -%}{{ link.href }}{% endif %}
+    {%- if link.href.endswith(".md") -%}
+    {%- elif link.href.endswith(".html") -%}.md
+    {%- else -%}.html.md{% endif %}
+  {%- endif -%}
+)
+  {% endif %}
+{% endfor %}
