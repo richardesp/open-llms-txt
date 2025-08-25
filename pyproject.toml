@@ -15,4 +15,4 @@ dependencies = [
   # TODO: group 2: fastapi, etc...)
 
 [project.scripts]
-open-llms-txt = "open_llms_txt.main:cli"
+open-llms-txt = "open_llms_txt.main:main"
