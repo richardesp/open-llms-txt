@@ -1,5 +1,6 @@
+from typing import Any, Dict, List
+
 from bs4 import BeautifulSoup, Tag
-from typing import Dict, Any, List
 
 
 def parse_html_to_json(html: str, **metadata) -> Dict[str, Any]:

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import asyncio
-import sys
 from pathlib import Path
+import sys
 from typing import Optional, Tuple
 from urllib.parse import urlparse
 

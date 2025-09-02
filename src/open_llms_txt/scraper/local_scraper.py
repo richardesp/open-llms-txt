@@ -1,10 +1,10 @@
-# src/open_llms_txt/web/local_scraper.py
-
+import logging
 from pathlib import Path
 from typing import Dict
+
 from bs4 import BeautifulSoup, Tag
+
 from .base_scraper import BaseScraper
-import logging
 
 logger = logging.getLogger(__name__)
 

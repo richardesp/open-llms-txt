@@ -1,8 +1,11 @@
 from __future__ import annotations
+
 from functools import wraps
-from typing import Callable, Set, Dict
-from flask import Blueprint, current_app, request, Response
+from typing import Callable, Dict, Set
 from urllib.parse import urljoin
+
+from flask import Blueprint, Response, current_app, request
+
 from open_llms_txt.generator.html_to_md import HtmlToMdGenerator
 
 # Only routes explicitly decorated can be mirrored
@@ -119,7 +122,8 @@ def html2md(
     mount_prefix : str, optional
         URL prefix under which the Markdown mirror is exposed. This becomes the
         blueprint's ``url_prefix`` and is also passed to the generator as
-        ``mount_prefix`` for constructing internal links. Defaults to ``""`` (no prefix).
+        ``mount_prefix`` for constructing internal links. Defaults to ``""``
+        (no prefix).
         Example: ``"/.llms"`` will serve mirrors at ``/.llms/<route>.html.md``.
     blueprint_rule : str, optional
         The blueprint rule that handles Markdown requests. It **must** contain the
@@ -214,7 +218,7 @@ def _ensure_llmstxt_blueprint(
     Mount a manifest route (default '/llms.txt') that:
       1) rebuilds the same allow-list used by .html.md
       2) fetches the HTML of the *decorated* endpoint (index page)
-      3) renders the manifest template *based on that HTML* (so its links drive the index)
+      3) renders the manifest template *based on that HTML*
     """
     if not template_name:
         raise ValueError("template_name is required")
@@ -265,7 +269,10 @@ def _ensure_llmstxt_blueprint(
         html_resp = client.get(page_path, headers={"Accept": "text/html"})
         if html_resp.status_code >= 400:
             return Response(
-                f"# {html_resp.status_code}\nFailed to render `{page_path}` for manifest.\n",
+                (
+                    f"# {html_resp.status_code}\n"
+                    f"Failed to render `{page_path}` for manifest.\n"
+                ),
                 status=html_resp.status_code,
                 mimetype="text/markdown",
             )
@@ -324,8 +331,8 @@ def llmstxt(
         Jinja template filename used to render the manifest. **Required.**
     mount_prefix : str, optional
         A prefix passed to the generator (not the URL of the manifest itself) so
-        your template can build links pointing at the Markdown mirrors, e.g., ``/.llms``.
-        Defaults to ``""``.
+        your template can build links pointing at the Markdown mirrors, e.g.,
+        ``/.llms``. Defaults to ``""``.
     manifest_path : str, optional
         Absolute URL rule at which the manifest is exposed. Must start with ``"/"``.
         Defaults to ``"/llms.txt"``.
@@ -334,7 +341,8 @@ def llmstxt(
     -------
     Callable[[Callable], Callable]
         A decorator that returns the original view function unchanged, while
-        ensuring the manifest route is registered once and rendered from that view's HTML.
+        ensuring the manifest route is registered once and rendered from that
+        view's HTML.
 
     Raises
     ------
@@ -367,13 +375,15 @@ def llmstxt(
             return render_template("features.html")
 
         # -> / (HTML)
-        # -> /llms.txt (manifest rendered from '/' HTML, linking to /.llms/features.html.md, etc.)
+        # -> /llms.txt (manifest rendered from '/' HTML,
+        # linking to /.llms/features.html.md, etc.)
     """
     if not template_name:
         raise ValueError("template_name is required")
 
     def decorator(view_func: Callable) -> Callable:
-        # Discover a concrete rule for the decorated HTML endpoint (prefer non-parameterized)
+        # Discover a concrete rule for the decorated HTML endpoint
+        # (prefer non-parameterized)
         endpoint = view_func.__name__
         discovered_rule = None
         try:

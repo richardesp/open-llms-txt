@@ -1,11 +1,11 @@
-from typing import Dict
-from bs4 import BeautifulSoup, Tag
-from urllib.parse import urlparse, urljoin
 import logging
+from typing import Dict
+from urllib.parse import urljoin, urlparse
 
+from bs4 import BeautifulSoup, Tag
 import httpx
 
-from .base_scraper import BaseScraper
+from open_llms_txt.scraper.base_scraper import BaseScraper
 
 logger = logging.getLogger(__name__)
 
