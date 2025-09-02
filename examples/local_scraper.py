@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from open_llms_txt.scraper.local_scraper import LocalScraper
+from open_llms_txt.scrapers.local_scraper import LocalScraper
 from open_llms_txt.generator.html_to_md import HtmlToMdGenerator
 
 logging.basicConfig()

@@ -5,7 +5,7 @@ from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup, Tag
 import httpx
 
-from open_llms_txt.scraper.base_scraper import BaseScraper
+from open_llms_txt.scrapers.base_scraper import BaseScraper
 
 logger = logging.getLogger(__name__)
 
