@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 import click
 
-from open_llms_txt.generator.html_to_md import HtmlToMdGenerator
+from open_llms_txt.generators.html_to_md import HtmlToMdGenerator
 from open_llms_txt.scrapers.web_scraper import WebScraper
 
 

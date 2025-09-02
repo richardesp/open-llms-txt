@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 
 from flask import Blueprint, Response, current_app, request
 
-from open_llms_txt.generator.html_to_md import HtmlToMdGenerator
+from open_llms_txt.generators.html_to_md import HtmlToMdGenerator
 
 # Only routes explicitly decorated can be mirrored
 _ALLOWED_PATHS: Set[str] = set()

@@ -3,7 +3,7 @@ from typing import Optional
 
 from jinja2 import Environment, FileSystemLoader
 
-from open_llms_txt.generator.template_engine import TemplateEngine
+from open_llms_txt.generators.template_engine import TemplateEngine
 from open_llms_txt.parsers.html import parse_html_to_json
 
 

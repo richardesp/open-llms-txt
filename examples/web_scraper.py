@@ -2,7 +2,7 @@ import asyncio
 import logging
 
 from open_llms_txt.scrapers.web_scraper import WebScraper
-from open_llms_txt.generator.html_to_md import HtmlToMdGenerator
+from open_llms_txt.generators.html_to_md import HtmlToMdGenerator
 
 logging.basicConfig()
 logging.getLogger("open_llms_txt").setLevel(logging.DEBUG)
