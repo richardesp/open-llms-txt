@@ -9,6 +9,7 @@ uv = "latest"
 [tasks.setup]
 description = "Create/update the project virtual env and install main+dev deps (uv sync --dev)"
 run = "uv sync --dev"
+depends = ["setup:git-hooks"]
 
 [tasks.clean]
 description = "Remove build artifacts and caches (dist/, build/, .pytest_cache/, .mypy_cache/, __pycache__)"
@@ -58,11 +59,6 @@ description = "Run the full test suite with pytest"
 depends = ["setup"]
 run = "uv run pytest -q"
 
-[tasks.test-unit]
-description = "Run unit tests only (if you mark them with -m unit)"
-depends = ["setup"]
-run = "uv run pytest -q -m unit"
-
 # ---------------------------
 # Build / packaging
 # ---------------------------
@@ -81,3 +77,32 @@ run = "uv build --wheel"
 description = "Build source distribution only"
 depends = ["setup"]
 run = "uv build --sdist"
+
+# ---------------------------
+# Git hooks
+# ---------------------------
+
+[tasks."git-hooks:pre-commit"]
+description = "Run style and type checks before each commit"
+depends = ["check"]
+
+[tasks."git-hooks:pre-push"]
+description = "Run tests before pushing"
+depends = ["test"]
+
+[tasks."setup:git-hooks"]
+description = "Install pre-commit and pre-push git hooks"
+run = """
+#!/bin/bash
+set -eu -o pipefail
+test -d .git || exit 0
+echo '#!/bin/sh' > .git/hooks/pre-commit
+echo '{{ mise_bin }} run git-hooks:pre-commit' >> .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+
+echo '#!/bin/sh' > .git/hooks/pre-push
+echo '{{ mise_bin }} run git-hooks:pre-push' >> .git/hooks/pre-push
+chmod +x .git/hooks/pre-push
+"""
+sources = [".git/hooks/pre-commit", ".git/hooks/pre-push"]
+outputs = { auto = true }
