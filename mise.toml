@@ -48,7 +48,7 @@ depends = ["lint", "format"]
 
 [tasks.check]
 description = "CI-style verification: lint (fixless), format check, and mypy"
-depends = ["setup", "lint", "format-check", "typecheck"]
+depends = ["lint", "format-check", "typecheck"]
 
 # ---------------------------
 # Tests
