@@ -1,9 +1,9 @@
 [tools]
 python = "3.13"
-uv = "latest"
+uv = "0.6.2"
 
 # ---------------------------
-# Setup
+# Local setup
 # ---------------------------
 
 [tasks.setup]
@@ -37,6 +37,11 @@ description = "Ruff code formatter (check only, no changes) across src/ and test
 depends = ["setup"]
 run = "uv run ruff format --check src tests"
 
+[tasks."lint-check"]
+description = "Ruff lint (no autofix)"
+depends = ["setup"]
+run = "uv run ruff check src tests"
+
 [tasks.typecheck]
 description = "Static type checking with mypy across src/ and tests/"
 depends = ["setup"]
@@ -47,8 +52,8 @@ description = "Apply Ruff autofixes and formatting (lint + format)"
 depends = ["lint", "format"]
 
 [tasks.check]
-description = "CI-style verification: lint (fixless), format check, and mypy"
-depends = ["lint", "format-check", "typecheck"]
+description = "CI-style verification: lint (no fix), format check, and mypy"
+depends = ["lint-check", "format-check", "typecheck"]
 
 # ---------------------------
 # Tests
