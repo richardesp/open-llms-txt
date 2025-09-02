@@ -26,3 +26,13 @@ dev = [
 
 [tool.uv]
 package = true
+
+[tool.ruff]
+line-length = 88                
+target-version = "py313"
+lint.select = ["E", "F", "I", "N"]  
+fix = true
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-sort-within-sections = true
