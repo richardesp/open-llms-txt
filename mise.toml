@@ -57,7 +57,7 @@ depends = ["setup", "lint", "format-check", "typecheck"]
 [tasks.tests]
 description = "Run the full test suite with pytest"
 depends = ["setup"]
-run = "uv run pytest -q"
+run = "uv run pytest"
 
 # ---------------------------
 # Build / packaging
@@ -88,7 +88,7 @@ depends = ["check"]
 
 [tasks."git-hooks:pre-push"]
 description = "Run tests before pushing"
-depends = ["test"]
+depends = ["tests"]
 
 [tasks."setup:git-hooks"]
 description = "Install pre-commit and pre-push git hooks"

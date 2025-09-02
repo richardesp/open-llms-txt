@@ -22,6 +22,7 @@ dev = [
     "mypy>=1.17.1",
     "pytest>=8.4.1",
     "pytest-asyncio>=1.1.0",
+    "pytest-xdist>=3.8.0",
     "ruff>=0.12.11",
 ]
 
@@ -37,3 +38,9 @@ fix = true
 [tool.ruff.lint.isort]
 combine-as-imports = true
 force-sort-within-sections = true
+
+[tool.pytest.ini_options]
+addopts = "-ra -n auto --maxfail=1 --durations=10"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+log_level = "DEBUG"
