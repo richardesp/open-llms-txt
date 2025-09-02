@@ -12,18 +12,19 @@ async def main():
     # scraper = WebScraper("https://research.ibm.com/")
     # pages = await scraper.collect_root_subpages()
     # generator = HtmlToMdGenerator()
-    
+
     # for p in pages:
-    #    print(f"{p}:\n{generator.render(await scraper.fetch_content(p), 
+    #    print(f"{p}:\n{generator.render(await scraper.fetch_content(p),
     #          root_url=scraper.root_page, source_url=p)}")
-    #    break    
+    #    break
+    root_url = "https://research.ibm.com/"
     url = "https://research.ibm.com/"
     scraper = WebScraper(url)
     generator = HtmlToMdGenerator(template_name="scraper_template.jinja")
-    print(generator.render(await scraper.fetch_content(url),
-                           root_url=url,
-                           source_url=url))
-    
+    print(
+        generator.render(await scraper.fetch_content(url), root_url=root_url, source_url=url)
+    )
+
     await scraper.close()
 
 

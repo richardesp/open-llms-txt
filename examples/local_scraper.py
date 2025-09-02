@@ -9,13 +9,13 @@ logging.getLogger("open_llms_txt").setLevel(logging.DEBUG)
 
 
 async def main():
-    scraper = LocalScraper("./site/index.html")
-    views = await scraper.collect_root_subpages()
-    generator = HtmlToMdGenerator()
+    scraper = LocalScraper("./static_site/index.html")
+    generator = HtmlToMdGenerator(template_name="scraper_template.jinja")
 
-    for p in views:
-        print(f"{p}:\n{generator.render(await scraper.fetch_content(p))}")
-        break
+    raw_html = await scraper.fetch_content(scraper.root_file)
+    md = generator.render(raw_html, root_url=scraper.local_root_url)
+    
+    print(md)
 
 
 if __name__ == "__main__":
