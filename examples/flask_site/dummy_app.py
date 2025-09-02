@@ -3,12 +3,14 @@ from open_llms_txt.middleware.flask import html2md
 
 app = Flask(__name__)
 
+
 @app.get("/")
 def home():
     return """
     <h1>Welcome</h1>
     <a href="/pricing">Pricing</a>
     """
+
 
 @app.get("/pricing")
 @html2md(app, template_name="html_to_md.jinja")
@@ -31,9 +33,11 @@ def pricing():
     </form>
     """
 
+
 @app.post("/signup")
 def signup():
     return "Thanks!"
+
 
 if __name__ == "__main__":
     app.run(port=8000, debug=True)

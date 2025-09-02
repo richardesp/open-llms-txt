@@ -1,7 +1,5 @@
-# src/open_llms_txt/web/remote_scraper.py
-
 from typing import Dict
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from urllib.parse import urlparse, urljoin
 import logging
 
@@ -38,11 +36,17 @@ class WebScraper(BaseScraper):
         content_map = {}
 
         for link in links:
-            href = link["href"]
-            parsed_href = urlparse(href)
+            if not isinstance(link, Tag):
+                continue
+
+            href_value = link.get("href")
+            if not isinstance(href_value, str):
+                continue  # Skip non-string hrefs
+
+            parsed_href = urlparse(href_value)
 
             if parsed_href.netloc == "" or parsed_href.netloc == self.domain:
-                full_url = urljoin(self.root_page, href)
+                full_url = urljoin(self.root_page, href_value)
                 logger.debug(f"Current subview detected: {full_url}")
                 self.root_subpages.add(full_url)
 
@@ -54,7 +58,6 @@ class WebScraper(BaseScraper):
                 header_text = (
                     main_heading.get_text(strip=True) if main_heading else "Untitled"
                 )
-
                 content_map[url] = header_text
 
         return content_map
