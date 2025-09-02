@@ -16,13 +16,10 @@
 ## Links
 {% for link in links %}
 - [{{ link.text }}](
-  {%- if link.href.startswith("http") -%} 
+  {%- if link.href.startswith("http") -%}
     {{ link.href }}
   {%- else -%}
-    {{ metadata.root_url.rstrip('/') }}/
-    {%- if link.href.startswith("./") -%}{{ link.href[2:] }}
-    {%- elif link.href.startswith("/") -%}{{ link.href[1:] }}
-    {%- else -%}{{ link.href }}{% endif %}
+    {{ metadata.root_url.rstrip('/') }}/{{ link.href.lstrip('/') }}
   {%- endif -%}
 )
 {% endfor %}

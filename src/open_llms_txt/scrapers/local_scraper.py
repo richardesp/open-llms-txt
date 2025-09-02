@@ -1,11 +1,10 @@
-# src/open_llms_txt/web/local_scraper.py
-
+import logging
 from pathlib import Path
 from typing import Dict
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+
+from bs4 import BeautifulSoup, Tag
+
 from .base_scraper import BaseScraper
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +13,7 @@ class LocalScraper(BaseScraper):
     def __init__(self, root: str):
         super().__init__(root)
         self.root_file = Path(root).resolve()
+        self.local_root_url = self.root_file.as_uri()
         self.base_dir = self.root_file.parent
         self.root_subpages = set()
 
@@ -36,12 +36,13 @@ class LocalScraper(BaseScraper):
         links = soup.find_all("a", href=True)
 
         for link in links:
-            href = link["href"]
-            target_path = (self.base_dir / href).resolve()
+            if isinstance(link, Tag) and isinstance(link.get("href"), str):
+                href: str = str(link["href"])
+                target_path = (self.base_dir / href).resolve()
 
-            if target_path.suffix == ".html" and target_path.exists():
-                logger.debug(f"Current subview detected: {target_path}")
-                self.root_subpages.add(str(target_path))
+                if target_path.suffix == ".html" and target_path.exists():
+                    logger.debug(f"Current subview detected: {target_path}")
+                    self.root_subpages.add(str(target_path))
 
         # Always include the root file itself
         self.root_subpages.add(str(self.root_file))

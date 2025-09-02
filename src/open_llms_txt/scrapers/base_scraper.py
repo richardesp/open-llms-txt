@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Dict
 import logging
+from typing import Dict
 
 logger = logging.getLogger(__name__)
 
@@ -8,8 +8,9 @@ logger = logging.getLogger(__name__)
 class BaseScraper(ABC):
     def __init__(self, root: str):
         self.root_page = root
-        self.root_subpages = set()
-        # TODO: add a template atribute to set the gross text from the typical llms.txt predefined initially
+        self.root_subpages: set[str] = set()
+        # TODO: add a template atribute to set the gross text from the typical llms.txt
+        # TODO: predefined initially
 
         logger.debug(f"Setted root_page: {self.root_page}")
 
@@ -30,7 +31,7 @@ class BaseScraper(ABC):
     async def fetch_content(self, path: str) -> str:
         """Returns the HTML content from the path"""
         pass
-    
+
     async def close(self) -> None:
         """Optional async cleanup. Default: no-op"""
         return

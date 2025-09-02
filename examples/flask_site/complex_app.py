@@ -1,4 +1,13 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, Response
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    flash,
+    jsonify,
+    Response,
+)
 from jinja2 import DictLoader
 from datetime import datetime
 import re
@@ -92,7 +101,6 @@ TEMPLATES = {
 </body>
 </html>
 """,
-
     # ---- Home page ----
     "home.html": r"""
 {% extends "base.html" %}
@@ -125,7 +133,6 @@ TEMPLATES = {
 </section>
 {% endblock %}
 """,
-
     # ---- Features page (table + small comparison) ----
     "features.html": r"""
 {% extends "base.html" %}
@@ -162,7 +169,6 @@ TEMPLATES = {
 </section>
 {% endblock %}
 """,
-
     # ---- Gallery page (images) ----
     "gallery.html": r"""
 {% extends "base.html" %}
@@ -189,7 +195,6 @@ TEMPLATES = {
 </div>
 {% endblock %}
 """,
-
     # ---- About page ----
     "about.html": r"""
 {% extends "base.html" %}
@@ -202,7 +207,6 @@ TEMPLATES = {
 </section>
 {% endblock %}
 """,
-
     # ---- Contact page ----
     "contact.html": r"""
 {% extends "base.html" %}
@@ -227,7 +231,6 @@ TEMPLATES = {
 </form>
 {% endblock %}
 """,
-
     # ---- Thank you page ----
     "thank_you.html": r"""
 {% extends "base.html" %}
@@ -240,7 +243,6 @@ TEMPLATES = {
 </section>
 {% endblock %}
 """,
-
     # ---- Error pages ----
     "404.html": r"""
 {% extends "base.html" %}
@@ -264,7 +266,6 @@ TEMPLATES = {
 </section>
 {% endblock %}
 """,
-
     "pricing.html": r"""
 {% extends "base.html" %}
 {% block title %}Pricing – Acme{% endblock %}
@@ -350,7 +351,7 @@ TEMPLATES = {
 </section>
 
 {% endblock %}
-"""
+""",
 }
 
 CSS = r"""
@@ -514,6 +515,7 @@ app.jinja_loader = DictLoader(TEMPLATES)
 # -----------------------------
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
+
 def valid_email(s: str) -> bool:
     return bool(s and EMAIL_RE.match(s))
 
@@ -524,6 +526,7 @@ def valid_email(s: str) -> bool:
 @app.get("/static/styles.css")
 def styles_css():
     return Response(CSS, mimetype="text/css")
+
 
 @app.get("/assets/logo.svg")
 def logo_svg():
@@ -550,25 +553,30 @@ def logo_svg():
 def inject_globals():
     return {"current_year": datetime.utcnow().year}
 
+
 @app.get("/")
 @llmstxt(app, template_name="llms.txt.jinja")
 def home():
     return render_template("home.html")
+
 
 @app.get("/about")
 @html2md(app, template_name="html_to_md.jinja")
 def about():
     return render_template("about.html")
 
+
 @app.get("/features")
 @html2md(app, template_name="html_to_md.jinja")
 def features():
     return render_template("features.html")
 
+
 @app.get("/gallery")
 @html2md(app, template_name="html_to_md.jinja")
 def gallery():
     return render_template("gallery.html")
+
 
 # ---- Pricing page rendered through your decorator (HTML → Markdown) ----
 @app.get("/pricing")
@@ -581,6 +589,7 @@ def pricing():
 @app.get("/contact")
 def contact_get():
     return render_template("contact.html")
+
 
 @app.post("/contact")
 def contact_post():
@@ -604,6 +613,7 @@ def contact_post():
     flash("Thanks! We received your message.", "success")
     return render_template("thank_you.html", name=name)
 
+
 # ---- Signup (from pricing form) ----
 @app.post("/signup")
 def signup():
@@ -615,15 +625,20 @@ def signup():
     flash(f"Thanks for signing up for the {plan.title()} plan!", "success")
     return redirect(url_for("home"))
 
+
 # ---- Tiny API ----
 @app.get("/api/health")
 def api_health():
-    return jsonify(status="ok", service="acme-demo", time=datetime.utcnow().isoformat() + "Z")
+    return jsonify(
+        status="ok", service="acme-demo", time=datetime.utcnow().isoformat() + "Z"
+    )
+
 
 @app.get("/api/time")
 def api_time():
     now = datetime.utcnow()
     return jsonify(utc=now.isoformat() + "Z", epoch=int(now.timestamp()))
+
 
 # ---- Error demo + handlers ----
 @app.get("/error-demo")
@@ -631,9 +646,11 @@ def error_demo():
     # Intentionally raise to show the 500 page
     raise RuntimeError("Demonstration error")
 
+
 @app.errorhandler(404)
 def not_found(e):
     return render_template("404.html"), 404
+
 
 @app.errorhandler(500)
 def server_error(e):

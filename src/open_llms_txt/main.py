@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 import asyncio
-import sys
 from pathlib import Path
+import sys
 from typing import Optional, Tuple
 from urllib.parse import urlparse
 
 import click
 
-from open_llms_txt.generator.html_to_md import HtmlToMdGenerator
-from open_llms_txt.scraper.web_scraper import WebScraper
+from open_llms_txt.generators.html_to_md import HtmlToMdGenerator
+from open_llms_txt.scrapers.web_scraper import WebScraper
 
 
 def _read_stdin() -> Optional[str]:

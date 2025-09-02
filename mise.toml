@@ -1,0 +1,113 @@
+[tools]
+python = "3.13"
+uv = "0.6.2"
+
+# ---------------------------
+# Local setup
+# ---------------------------
+
+[tasks.setup]
+description = "Create/update the project virtual env and install main+dev deps (uv sync --dev)"
+run = "uv sync --dev"
+depends = ["setup:git-hooks"]
+
+[tasks.clean]
+description = "Remove build artifacts and caches (dist/, build/, .pytest_cache/, .mypy_cache/, __pycache__)"
+run = """
+rm -rf dist build .pytest_cache .mypy_cache || true
+find . -type d -name __pycache__ -prune -exec rm -rf {} +
+"""
+
+# ---------------------------
+# Linting / formatting / typing
+# ---------------------------
+
+[tasks.lint]
+description = "Ruff lint (with autofix) across src/ and tests/"
+depends = ["setup"]
+run = "uv run ruff check --fix src tests"
+
+[tasks.format]
+description = "Ruff code formatter (apply changes) across src/ and tests/"
+depends = ["setup"]
+run = "uv run ruff format src tests"
+
+[tasks.format-check]
+description = "Ruff code formatter (check only, no changes) across src/ and tests/"
+depends = ["setup"]
+run = "uv run ruff format --check src tests"
+
+[tasks."lint-check"]
+description = "Ruff lint (no autofix)"
+depends = ["setup"]
+run = "uv run ruff check src tests"
+
+[tasks.typecheck]
+description = "Static type checking with mypy across src/ and tests/"
+depends = ["setup"]
+run = "uv run mypy --show-error-context --pretty src tests"
+
+[tasks.style]
+description = "Apply Ruff autofixes and formatting (lint + format)"
+depends = ["lint", "format"]
+
+[tasks.check]
+description = "CI-style verification: lint (no fix), format check, and mypy"
+depends = ["lint-check", "format-check", "typecheck"]
+
+# ---------------------------
+# Tests
+# ---------------------------
+
+[tasks.tests]
+description = "Run the full test suite with pytest"
+depends = ["setup"]
+run = "uv run pytest"
+
+# ---------------------------
+# Build / packaging
+# ---------------------------
+
+[tasks.build]
+description = "Build wheel and sdist into dist/ (uv build)"
+depends = ["setup"]
+run = "uv build"
+
+[tasks.wheel]
+description = "Build wheel only"
+depends = ["setup"]
+run = "uv build --wheel"
+
+[tasks.sdist]
+description = "Build source distribution only"
+depends = ["setup"]
+run = "uv build --sdist"
+
+# ---------------------------
+# Git hooks
+# ---------------------------
+
+[tasks."git-hooks:pre-commit"]
+description = "Run style and type checks before each commit"
+depends = ["check"]
+
+[tasks."git-hooks:pre-push"]
+description = "Run tests before pushing"
+depends = ["tests"]
+
+[tasks."setup:git-hooks"]
+description = "Install pre-commit and pre-push git hooks"
+run = """
+#!/bin/bash
+set -eu -o pipefail
+test -d .git || exit 0
+echo '#!/bin/sh' > .git/hooks/pre-commit
+echo '{{ mise_bin }} run git-hooks:pre-commit' >> .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+
+echo '#!/bin/sh' > .git/hooks/pre-push
+echo '{{ mise_bin }} run git-hooks:pre-push' >> .git/hooks/pre-push
+chmod +x .git/hooks/pre-push
+"""
+sources = [".git/hooks/pre-commit", ".git/hooks/pre-push"]
+outputs = { auto = true }

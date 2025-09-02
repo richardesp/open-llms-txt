@@ -16,3 +16,31 @@ dependencies = [
 
 [project.scripts]
 open-llms-txt = "open_llms_txt.main:main"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.17.1",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
+    "pytest-xdist>=3.8.0",
+    "ruff>=0.12.11",
+]
+
+[tool.uv]
+package = true
+
+[tool.ruff]
+line-length = 88                
+target-version = "py313"
+lint.select = ["E", "F", "I", "N"]  
+fix = true
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-sort-within-sections = true
+
+[tool.pytest.ini_options]
+addopts = "-ra -n auto --maxfail=1 --durations=10"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+log_level = "DEBUG"
