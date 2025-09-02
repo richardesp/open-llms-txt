@@ -54,7 +54,7 @@ depends = ["setup", "lint", "format-check", "typecheck"]
 # Tests
 # ---------------------------
 
-[tasks.test]
+[tasks.tests]
 description = "Run the full test suite with pytest"
 depends = ["setup"]
 run = "uv run pytest -q"
