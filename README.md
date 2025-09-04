@@ -17,6 +17,8 @@
 
 ⚠️ **Early MVP**. Interfaces may change. This repo shows a working architecture and a minimal developer experience (DX) with uv + mise, tests, and CI. The goal is to validate the approach and make it easy to port to other frameworks.
 
+This repository started as an individual MVP proposal. The idea would be to transfer it under an IBM OSS org if it proves useful to the community
+
 ## Why
 
 LLM agents (ChatGPT, Claude, etc.) increasingly “read” the web. But raw HTML is noisy (ads, navs, interactivity). Sites need a **standard, opt-in surface** that’s clean, stable, and easy to crawl.
