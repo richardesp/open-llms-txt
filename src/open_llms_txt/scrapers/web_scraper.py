@@ -1,3 +1,6 @@
+# Copyright (c) 2025 Ricardo Espantaleón Pérez
+# SPDX-License-Identifier: Apache-2.0
+
 import logging
 from typing import Dict
 from urllib.parse import urljoin, urlparse

@@ -1,3 +1,6 @@
+# Copyright (c) 2025 Ricardo Espantaleón Pérez
+# SPDX-License-Identifier: Apache-2.0
+
 import logging
 from pathlib import Path
 from typing import Dict

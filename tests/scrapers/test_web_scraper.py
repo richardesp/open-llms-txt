@@ -1,3 +1,6 @@
+# Copyright (c) 2025 Ricardo Espantaleón Pérez
+# SPDX-License-Identifier: Apache-2.0
+
 from typing import Dict, Optional
 
 import pytest

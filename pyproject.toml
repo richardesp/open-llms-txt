@@ -3,6 +3,8 @@ name = "open-llms-txt"
 version = "0.1.0"
 description = "CLI tool to auto-generate llms.txt and .html.md files for making your website LLM-ready. Helps AI agents access your content cleanly, without scraping or CAPTCHA headaches."
 readme = "README.md"
+license = { text = "Apache-2.0" }
+classifiers = ["License :: OSI Approved :: Apache Software License"]
 requires-python = ">=3.11"
 dependencies = [
     "beautifulsoup4>=4.13.4",
@@ -12,7 +14,7 @@ dependencies = [
     "jinja2>=3.1.6",
     "markdownify>=1.2.0",
 ] # TODO: split each dependency based on the middleware or CLI version to use (group 1: flask,
-  # TODO: group 2: fastapi, etc...)
+# TODO: group 2: fastapi, etc...)
 
 [project.scripts]
 open-llms-txt = "open_llms_txt.main:main"
@@ -26,13 +28,16 @@ dev = [
     "ruff>=0.12.11",
 ]
 
+[tool.setuptools]
+license-files = ["LICENSE"]
+
 [tool.uv]
 package = true
 
 [tool.ruff]
-line-length = 88                
+line-length = 88
 target-version = "py313"
-lint.select = ["E", "F", "I", "N"]  
+lint.select = ["E", "F", "I", "N"]
 fix = true
 
 [tool.ruff.lint.isort]
