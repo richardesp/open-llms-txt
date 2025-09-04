@@ -1,3 +1,6 @@
+# Copyright (c) 2025 Ricardo Espantaleón Pérez
+# SPDX-License-Identifier: Apache-2.0
+
 import pytest
 
 from open_llms_txt.parsers.html import parse_html_to_json
