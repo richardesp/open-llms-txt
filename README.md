@@ -73,7 +73,7 @@ Run your app, then:
 
 ```bash
 # LLM-friendly Markdown mirrors
-curl http://localhost:5000/.llms/docs.html.md
+curl http://localhost:5000/docs.html.md
 
 # Manifest of available mirrors
 curl http://localhost:5000/llms.txt
@@ -98,7 +98,7 @@ You can override with your own template directory:
 ```mermaid
 flowchart LR
   A[Middleware route returns HTML] --> B[BeautifulSoup parse_html_to_json]
-  B --> C["Normalized JSON<br/>&#123; title, h1, headings, paragraphs, links &#125;"]
+  B --> C["Normalized JSON: title, h1, headings, paragraphs, links"]
   C --> D[Jinja HtmlToMdGenerator]
   D --> E[Markdown output]
   E -->|served as| F["/[.llms]/&lt;route&gt;.html.md"]
@@ -106,15 +106,15 @@ flowchart LR
   H -->|lists| F
 ```
 
-Flask middleware
-  @html2md   : exposes /.llms/<route>.html.md
-  @llmstxt   : exposes /llms.txt (based on a decorated source page + allow-list)
+### Flask middleware
+- `@html2md`: exposes /[.llms]/<route>.html.md
+- `@llmstxt`: exposes llms.txt (based on a decorated source page + allow-list)
 
-Notes / guarantees (MVP):
-	•	Only same-domain links are mirrored by the web scraper logic.
-	•	Anchors and non-.html files are ignored for mirrors.
-	•	Middleware uses module-level state; one Flask app per process recommended.
-	•	Errors from source pages propagate as Markdown # 4xx/5xx bodies.
+### Notes / guarantees (MVP):
+- Only **same-domain links are mirrored** by the web scraper logic.
+- Anchors and **non-.html files are ignored for mirrors**.
+- **Middleware uses module-level state**; one Flask app per process recommended.
+- **Errors from source pages propagate as Markdown** # 4xx/5xx bodies.
 
 ## Local development
 
@@ -147,7 +147,7 @@ This is an `architecture`, not just a Flask helper. Adapters can reuse the same 
 - Parsers (`parse_html_to_json`)
 - Generators (`HtmlToMdGenerator` + your Jinja templates)
 - A **small framework adapter** to:
-    - expose Markdown mirrors (e.g., `/.llms/<route>.html.md`)
+    - expose Markdown mirrors (e.g., `/[.llms]/<route>.html.md`)
     - render `/llms.txt` from an index page
     - enforce an allow-list of mirrored routes
 
@@ -160,8 +160,8 @@ This is an `architecture`, not just a Flask helper. Adapters can reuse the same 
 
 Contributions welcome! This is an MVP to shape a future llms.txt ecosystem.
 1. Fork & branch
-2.	mise run setup
-3.	mise run check && mise run tests
+2.	`mise run setup`
+3.	`mise run check` && `mise run tests`
 4.	PR 🚀
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details.
