@@ -93,6 +93,16 @@ You can override with your own template directory:
 @llmstxt(app, template_dir="path/to/templates", template_name="llms.txt.jinja")
 ```
 
+### Demo app
+
+```bash
+# Run the included demo app
+mise run setup
+uv run python examples/flask_site/complex_app.py
+curl -s http://127.0.0.1:8000/pricing.html.md | sed -n '1,20p'
+curl -s http://127.0.0.1:8000/llms.txt | sed -n '1,20p'
+```
+
 ## Design overview
 
 ```mermaid
